@@ -1,3 +1,4 @@
+#include <common/config_common.h>
 #include <Common/getNumberOfPhysicalCPUCores.h>
 #include <thread>
 
@@ -12,7 +13,15 @@
 
 unsigned getNumberOfPhysicalCPUCores()
 {
-#if USE_CPUID
+#if CLICKHOUSE_RESOURCE_ENV
+    const char * raw_env_cores = std::getenv("CLICKHOUSE_CPU_CORES");
+    unsigned env_cores = raw_env_cores == nullptr ? 0 : atoi(raw_env_cores);
+
+    if (env_cores != 0)
+    {
+        return env_cores;
+    }
+#elif USE_CPUID
     cpu_raw_data_t raw_data;
     cpu_id_t data;
 

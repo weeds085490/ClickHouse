@@ -5,3 +5,4 @@
 #cmakedefine01 USE_JEMALLOC
 #cmakedefine01 UNBUNDLED
 #cmakedefine01 WITH_COVERAGE
+#cmakedefine01 CLICKHOUSE_RESOURCE_ENV
