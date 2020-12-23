@@ -3765,6 +3765,25 @@ try
     }
 
     part_log->add(part_log_elem);
+    std::stringstream log_message;
+    log_message << "TX-MERGE-TRACE|Type:" << part_log_elem.event_type
+        << "|event_time:"<< part_log_elem.event_time
+        << "|duration_ms:"<< part_log_elem.duration_ms
+        << "|database:"<< part_log_elem.database_name
+        << "|table:"<< part_log_elem.table_name
+        << "|partition_id:"<< part_log_elem.partition_id
+        << "|path_on_disk:"<< part_log_elem.path_on_disk
+        << "|read_rows:"<< part_log_elem.rows_read
+        << "|read_bytes_uncompressed:"<< part_log_elem.bytes_read_uncompressed
+        << "|peak_memory_usage:"<< part_log_elem.peak_memory_usage
+        << "|error:"<< part_log_elem.error
+        << "|exception:"<< part_log_elem.exception
+        << "|merged_from:[";
+
+    for (auto i : ext::range(0, part_log_elem.source_part_names.size()))
+        log_message << (i != 0 ? ", " : "") << part_log_elem.source_part_names[i];
+    log_message << "]";
+    LOG_TRACE(log, log_message.rdbuf());
 }
 catch (...)
 {
