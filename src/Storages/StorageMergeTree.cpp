@@ -138,9 +138,11 @@ void StorageMergeTree::startup()
 
 void StorageMergeTree::shutdown()
 {
-    if (shutdown_called)
+    bool old_value = false;
+    if (!shutdown_called.compare_exchange_strong(old_value, true))
+    {
         return;
-    shutdown_called = true;
+    }
 
     /// Unlock all waiting mutations
     {
