@@ -3654,11 +3654,6 @@ void StorageReplicatedMergeTree::startup()
 
 void StorageReplicatedMergeTree::shutdown()
 {
-    bool old_value = false;
-    if (!shutdown_called.compare_exchange_strong(old_value, true))
-    {
-        return;
-    }
     /// Cancel fetches, merges and mutations to force the queue_task to finish ASAP.
     fetcher.blocker.cancelForever();
     merger_mutator.merges_blocker.cancelForever();
@@ -3685,28 +3680,6 @@ void StorageReplicatedMergeTree::shutdown()
         /// Wait for all of them
         std::unique_lock lock(data_parts_exchange_ptr->rwlock);
     }
-
-    /// We clear all old parts after stopping all background operations. It's
-    /// important, because background operations can produce temporary parts
-    /// which will remove themselves in their descrutors. If so, we may have
-    /// race condition between our remove call and background process.
-    clearOldPartsFromFilesystem(true);
-
-    auto lock = lockParts();
-    DataPartsVector all_parts(data_parts_by_info.begin(), data_parts_by_info.end());
-
-    size_t committed_parts_count = 0;
-    for (const auto & parts_info : all_parts)
-    {
-        if (parts_info->state == DataPartState::Committed)
-        {
-            committed_parts_count++;
-        }
-    }
-
-    CurrentMetrics::sub(CurrentMetrics::Parts, all_parts.size());
-    CurrentMetrics::sub(CurrentMetrics::PartsActive, committed_parts_count);
-    CurrentMetrics::sub(CurrentMetrics::PartsInactive, all_parts.size() - committed_parts_count);
 }
 
 

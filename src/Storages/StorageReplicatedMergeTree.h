@@ -279,8 +279,6 @@ private:
 
     DataPartsExchange::Fetcher fetcher;
 
-    std::atomic<bool> shutdown_called {false};
-
     /// When activated, replica is initialized and startup() method could exit
     Poco::Event startup_event;
 

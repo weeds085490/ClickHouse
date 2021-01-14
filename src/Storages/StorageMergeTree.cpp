@@ -156,37 +156,7 @@ void StorageMergeTree::shutdown()
     background_executor.finish();
     background_moves_executor.finish();
 
-    try
-    {
-        /// We clear all old parts after stopping all background operations.
-        /// It's important, because background operations can produce temporary
-        /// parts which will remove themselves in their descrutors. If so, we
-        /// may have race condition between our remove call and background
-        /// process.
-        clearOldPartsFromFilesystem(true);
-
-        auto lock = lockParts();
-        DataPartsVector all_parts(data_parts_by_info.begin(), data_parts_by_info.end());
-
-        size_t committed_parts_count = 0;
-        for (const auto & parts_info : all_parts)
-        {
-            if (parts_info->state == DataPartState::Committed)
-            {
-                ++committed_parts_count;
-            }
-        }
-
-        CurrentMetrics::sub(CurrentMetrics::Parts, all_parts.size());
-        CurrentMetrics::sub(CurrentMetrics::PartsActive, committed_parts_count);
-        CurrentMetrics::sub(CurrentMetrics::PartsInactive, all_parts.size() - committed_parts_count);
-    }
-    catch (...)
-    {
-        /// Example: the case of readonly filesystem, we have failure removing old parts.
-        /// Should not prevent table shutdown.
-        tryLogCurrentException(log);
-    }
+    MergeTreeData::shutdown();
 }
 
 

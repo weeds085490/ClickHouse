@@ -360,6 +360,8 @@ public:
     bool supportsSettings() const override { return true; }
     NamesAndTypesList getVirtuals() const override;
 
+    void shutdown() override;
+
     bool mayBenefitFromIndexForIn(const ASTPtr & left_in_operand, const Context &, const StorageMetadataPtr & metadata_snapshot) const override;
 
     /// Load the set of data parts from disk. Call once - immediately after the object is created.
@@ -957,6 +959,8 @@ private:
     std::atomic<size_t> total_active_size_bytes = 0;
     std::atomic<size_t> total_active_size_rows = 0;
     std::atomic<size_t> total_active_size_parts = 0;
+
+    std::atomic<bool> shutdown_called {false};
 };
 
 }
