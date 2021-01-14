@@ -3654,6 +3654,11 @@ void StorageReplicatedMergeTree::startup()
 
 void StorageReplicatedMergeTree::shutdown()
 {
+    bool old_value = false;
+    if (!shutdown_called.compare_exchange_strong(old_value, true))
+    {
+        return;
+    }
     /// Cancel fetches, merges and mutations to force the queue_task to finish ASAP.
     fetcher.blocker.cancelForever();
     merger_mutator.merges_blocker.cancelForever();
