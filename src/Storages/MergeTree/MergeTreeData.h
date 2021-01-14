@@ -343,6 +343,7 @@ public:
                   bool attach,
                   BrokenPartCallback broken_part_callback_ = [](const String &){});
 
+    ~MergeTreeData() override;
 
     StoragePolicyPtr getStoragePolicy() const override;
 
@@ -960,7 +961,7 @@ private:
     std::atomic<size_t> total_active_size_rows = 0;
     std::atomic<size_t> total_active_size_parts = 0;
 
-    std::atomic<bool> shutdown_called {false};
+    std::atomic<bool> data_shutdown_called {false};
 };
 
 }

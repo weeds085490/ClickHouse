@@ -4028,7 +4028,7 @@ void MergeTreeData::setDataVolume(size_t bytes, size_t rows, size_t parts)
 void MergeTreeData::shutdown()
 {
     bool old_value = false;
-    if (!shutdown_called.compare_exchange_strong(old_value, true))
+    if (!data_shutdown_called.compare_exchange_strong(old_value, true))
     {
         return;
     }
@@ -4064,5 +4064,9 @@ void MergeTreeData::shutdown()
         /// Should not prevent table shutdown.
         tryLogCurrentException(log);
     }
+}
+
+MergeTreeData::~MergeTreeData() {
+    shutdown();
 }
 }
